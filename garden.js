@@ -3,6 +3,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
     const cityfolk = new Image()
     cityfolk.src = 'cityfolk6.png'
+    const spinsheet = new Image()
+    spinsheet.src = '32spin.png'
 
     const squaretable = {} // this section of code is an optimization for use of the hypotenuse function on Line and LineOP objects
     for(let t = 0;t<10000000;t++){
@@ -1141,7 +1143,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.ray = []
         }
     }
-    function setUp(canvas_pass, style = "#AAAAAA") {
+    function setUp(canvas_pass, style = "#AAFFAA") {
         canvas = canvas_pass
         canvas_context = canvas.getContext('2d');
         canvas.style.background = style
@@ -1161,7 +1163,33 @@ window.addEventListener('DOMContentLoaded', (event) => {
             TIP_engine.x = XS_engine
             TIP_engine.y = YS_engine
             TIP_engine.body = TIP_engine
+            let wet = 0
+            if(keysPressed['f']){
             fruits.push(new Fruit(TIP_engine.x, TIP_engine.y))
+            let max = 99999999
+            let index = 0
+                for(let t = 0;t<pomaos.length;t++){
+                    let link = new LineOP(TIP_engine, pomaos[t].body)
+                    if(link.hypotenuse()<max){
+                        max = link.hypotenuse()
+                        index = t
+                    }
+                }
+
+            pomaos[index].lick(TIP_engine)
+            }else{
+                for(let t = 0;t<pomaos.length;t++){
+                    if(pomaos[t].body.isPointInside(TIP_engine)){
+                        UI = new StatUI(pomaos[t])
+                        wet = 1
+                    }
+                }
+            }
+            if(wet == 0){
+                UI = {}
+                UI.draw = empty
+            }
+            console.log(pomaos[index])
             // example usage: if(object.isPointInside(TIP_engine)){ take action }
         window.addEventListener('pointermove', continued_stimuli);
         });
@@ -1177,7 +1205,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
             TIP_engine.y = YS_engine
             TIP_engine.body = TIP_engine
 
-            fruits.push(new Fruit(TIP_engine.x, TIP_engine.y))
+            if(keysPressed['f']){
+                fruits.push(new Fruit(TIP_engine.x, TIP_engine.y))
+            }
         }
     }
     function gamepad_control(object, speed = 1) { // basic control for objects using the controler
@@ -1326,112 +1356,266 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     this.anchor = pomaos[t].tongue
                 }
                 if(pomaos[t].centrix.doesPerimeterTouch(this.body)){
+                    if(this.body.radius != .1){
+                        let k = Math.floor(Math.random()*6)
+                        pomaos[t].exps[k] += Math.floor(Math.random()*50)
+                        if(pomaos[t].exps[k]  >= 100){
+                            pomaos[t].exps[k] -=100
+                            pomaos[t].stats[k] +=1
+                        }
+                    }
                     this.body.radius = .1
                 }
             }
         }
     }
 
+    let UI = {}
+    function empty(){}
+    UI.draw = empty
+    let selected = {}
+
+
+    class StatUI{
+        constructor(pomao){
+
+            this.pomao = pomao
+            this.stats = pomao.stats
+            this.exps = pomao.exps
+        }
+        draw(){
+
+            this.body = new Rectangle(this.pomao.body.x+32, this.pomao.body.y-52, 82, 172, "#00AAAA66")
+            this.body.draw()
+
+            canvas_context.font = "18px Arial";
+            canvas_context.fillStyle = 'yellow'
+            canvas_context.strokeStyle = 'black'
+            canvas_context.lineWidth = 2
+
+            canvas_context.strokeText(this.pomao.name, this.body.x +5, this.body.y+16)
+            canvas_context.fillText(this.pomao.name, this.body.x +5, this.body.y+16)
+
+            canvas_context.font = "12px Arial";
+            for(let t = 0;t<this.stats.length;t++){
+                
+                if(t == 0){
+                    canvas_context.strokeText("Stamina: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                    canvas_context.fillText("Stamina: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                }else if(t == 1){
+                    canvas_context.strokeText("Power: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                    canvas_context.fillText("Power: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                }else if(t == 2){
+                    canvas_context.strokeText("Resilience: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                    canvas_context.fillText("Resilience: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                }else if(t == 3){
+                    canvas_context.strokeText("Speed: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                    canvas_context.fillText("Speed: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                }else if(t == 4){
+                    canvas_context.strokeText("Recovery: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                    canvas_context.fillText("Recovery: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                }else if(t == 5){
+                    canvas_context.strokeText("Finesse: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                    canvas_context.fillText("Finesse: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
+                }
+            }
+            for(let t = 0;t<this.exps.length;t++){
+                let rect = new Rectangle(this.body.x + 5, this.body.y+(t*24)+39, 72, 5, "blue")
+                let rect2 = new Rectangle(this.body.x + 5, this.body.y+(t*24)+39, (this.exps[t]/100)*72, 5, "yellow")
+                rect.draw()
+                rect2.draw()
+            }
+        }
+    }
 
 
 
+    let typez = 0
     class Pomaoranian{
         constructor(x, y) {
+            this.name = "Po"
             this.width = 35 + (Math.random() * 5)
             this.height = this.width
-            this.x = x
-            this.y = y //- (this.height - 1)
+            this.body = new Circle(x,y, 16, "transparent", 0, 0, 1, 1)
+            this.body.x = x
+            this.body.y = y //- (this.height - 1)
+            this.body.radius = 32 //- (this.height - 1)
             this.dir = 0
-            this.ydir = 0
             this.rate = Math.random() + 1
             this.type = Math.floor(Math.random()*300)
             this.tonguecolor = getRandomColor()
-            this.centrix = new Circle(this.x+(this.width*.5), this.y+(this.height*.5), 3, this.tonguecolor)
-            this.tongue = new Circle(this.x+(this.width*.5), this.y+(this.height*.5), 3, this.tonguecolor, 0,0,.5)
-            this.link = new LineOP(this.centrix, this.tongue, this.tonguecolor, 2)
+            this.centrix = new Circle(this.body.x, this.body.y+5, 3, this.tonguecolor)
+            this.tongue = new Circle(this.body.x, this.body.y+5, 5, this.tonguecolor, 0,0,.5)
+            this.link = new LineOP(this.centrix, this.tongue, this.tonguecolor, 3)
+            this.xdir = 0
+            this.ydir = 0
+            this.type = typez//Math.floor(Math.random()*16) //typez//
+            typez++
+            this.type += (1/64)
+            this.stats = [1,1,1,1,1,1]
+            this.exps = [0,0,0,0,0,0]
         }
-        move(){
-
-            if(Math.random()<.1){
-                if(Math.random()<.05){
-                    this.dir = 0
+        draw(){
+            this.centrix.x = this.body.x
+            this.centrix.y = this.body.y+5
+            this.tongue.xmom += (this.centrix.x-this.tongue.x)/10
+            this.tongue.frictiveMove()
+            // this.move()
+            this.tongue.draw()
+            this.link.draw()
+            this.move()
+            if(this.xdir == 1){
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, 64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, 7*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, 0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
                 }
-                if(Math.random()<.05){
-                    this.dir = 1
+            }else if(this.xdir == -1){
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, 3*64,0+(this.type*64), 64,64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, 5*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, 4*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }else{
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, 128,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, 6*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, 0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
                 }
             }
-            if(Math.random()<.1){
-                if(Math.random()<.05){
+        }
+
+        repel(){
+            for(let t = 0;t<pomaos.length;t++){
+                if(this != pomaos[t]){
+                    if(this.body.doesPerimeterTouch(pomaos[t].body)){
+                        let link = new LineOP(this.body, pomaos[t].body)
+                        this.centrix.x += ((link.hypotenuse())/2)*(Math.cos(link.angle()))/20
+                        this.centrix.y += ((link.hypotenuse())/2)*(Math.sin(link.angle()))/20
+                        this.tongue.x += ((link.hypotenuse())/2)*(Math.cos(link.angle()))/20
+                        this.tongue.y += ((link.hypotenuse())/2)*(Math.sin(link.angle()))/20
+                        this.body.x += ((link.hypotenuse())/2)*(Math.cos(link.angle()))/20
+                        this.body.y += ((link.hypotenuse())/2)*(Math.sin(link.angle()))/20
+                    }
+                }
+            }
+        }
+        
+        move(){
+            this.repel()
+            // // *
+            // if(keysPressed['s']){
+            //     if(!keysPressed['d'] && !keysPressed['a']){
+            //         this.xdir = 0
+            //     }
+            //     this.ydir = 1
+            // }
+            // if(keysPressed['w']){
+            //     if(!keysPressed['d'] && !keysPressed['a']){
+            //         this.xdir = 0
+            //     }
+            //     this.ydir = -1
+            // }
+            // if(keysPressed['a']){
+            //     if(!keysPressed['s'] && !keysPressed['w']){
+            //         this.ydir = 0
+            //     }
+            //     this.xdir = -1
+            // }
+            // if(keysPressed['d']){
+            //     if(!keysPressed['s'] && !keysPressed['w']){
+            //         this.ydir = 0
+            //     }
+            //     this.xdir = 1
+            // }
+            // if(keysPressed['s'] ||keysPressed['w'] ||keysPressed['d'] ||keysPressed['a']){
+            //     this.body.x += this.xdir/3
+            //     this.body.y += this.ydir/3
+            // }
+            
+
+            //if(Math.random()<.005){
+
+                if(Math.random()<.005){
+                    if(Math.random()<.005){
+                    this.xdir = 0
+                }
+                this.ydir = 1
+            }
+            if(Math.random()<.005){
+                if(Math.random()<.005){
+                    this.xdir = 0
+                }
+                this.ydir = -1
+            }
+            if(Math.random()<.005){
+                if(Math.random()<.005){
                     this.ydir = 0
                 }
-                if(Math.random()<.05){
+                this.xdir = -1
+            }
+            if(Math.random()<.005){
+                if(Math.random()<.005){
+                    this.ydir = 0
+                }
+                this.xdir = 1
+            }
+            if(Math.random()<.9){
+                this.moving = 1
+            }else{
+                this.moving = 0
+            }
+
+
+
+            if(this.moving == 1){
+                this.body.x += this.xdir/3
+                this.body.y += this.ydir/3
+                this.tongue.x += this.xdir/3
+                this.tongue.y += this.ydir/3
+                if(this.body.x < 0){
+                    this.xdir = 1
+                }
+                if(this.body.x >1280){
+                    this.xdir = -1
+                }
+                if(this.body.y < 0){
                     this.ydir = 1
                 }
-                if(Math.random()<.05){
+                if(this.body.y > 720){
                     this.ydir = -1
                 }
             }
-
-            if(this.x < 1280-this.width){
-                if(this.dir == 0){
-                    this.x+=.5
-                    this.centrix.x+=.5
-                    this.tongue.x+=.5
-                }
-            }else{
-                this.dir = 1
-            }
-            if(this.x > 0){
-                if(this.dir == 1){
-                    this.x-=.5
-                    this.centrix.x-=.5
-                    this.tongue.x-=.5
-                }
-            }else{
-                this.dir = 0
-            }
-            if(this.y > 0){
-                if(this.ydir == -1){
-                    this.y-=.5
-                    this.centrix.y-=.5
-                    this.tongue.y-=.5
-                }
-            }else{
-                this.ydir = 1
-            }
-            if(this.y < 720-this.width){
-                if(this.ydir == 1){
-                    this.y+=.5
-                    this.centrix.y+=.5
-                    this.tongue.y+=.5
-                }
-            }else{
-                this.ydir = -1
-            }
-            if(Math.random()<.05){
-                this.lick()
-            }
-            this.tongue.xmom += (this.centrix.x-this.tongue.x)/10
         }
-        lick(){
-         if(this.dir == 1){
-            this.tongue.xmom = -29
+        lick(point){
+         if(point.x < this.body.x){
+            this.tongue.xmom = -39
+            this.xdir = -1
+            this.ydir = 0
          }else{
-            this.tongue.xmom = 29
+            this.tongue.xmom = 39
+            this.xdir = 1
+            this.ydir = 0
          }
         }
-        draw() {
-            this.tongue.frictiveMove()
-            this.move()
-            this.tongue.draw()
-            this.link.draw()
-            canvas_context.drawImage(cityfolk, this.dir * 128, (this.type * 128) + 1, 128, 128, this.x, this.y - (Math.sin(((global.timeloop * this.rate) + 3.14)) * 1.7), this.width, this.height + (Math.sin(((global.timeloop * this.rate) + 3.14)) * 1.7))
-        }
+        // draw() {
+        //     this.tongue.frictiveMove()
+        //     this.move()
+        //     this.tongue.draw()
+        //     this.link.draw()
+        //     canvas_context.drawImage(cityfolk, this.dir * 128, (this.type * 128) + 1, 128, 128, this.x, this.y - (Math.sin(((global.timeloop * this.rate) + 3.14)) * 1.7), this.width, this.height + (Math.sin(((global.timeloop * this.rate) + 3.14)) * 1.7))
+        // }
     }
 
     let pomaos = []
 
-    for(let t = 0;t<16;t++){
+    for(let t = 0;t<32;t++){
         pomaos[t] = new Pomaoranian(50+Math.random()*1180, 50+Math.random()*620)
     }
 
@@ -1446,12 +1630,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
         canvas_context.clearRect(0, 0, canvas.width, canvas.height)  // refreshes the image
         gamepadAPI.update() //checks for button presses/stick movement on the connected controller)
         // // game code goes here]
-        for(let t = 0;t<pomaos.length;t++){
-            pomaos[t].draw()
-        }
         for(let t = 0;t<fruits.length;t++){
             fruits[t].draw()
         }
+        for(let t = 0;t<pomaos.length;t++){
+            pomaos[t].draw()
+        }
+        UI.draw()
     }
 
 })
