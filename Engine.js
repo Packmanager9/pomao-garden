@@ -1,14 +1,8 @@
 
 window.addEventListener('DOMContentLoaded', (event) => {
 
-    const cityfolk = new Image()
-    cityfolk.src = 'cityfolk6.png'
-    const spinsheet = new Image()
-    spinsheet.src = '128spim.png'
-    const pointerimg = new Image()
-    pointerimg.src = 'pointer.png'
-    const grabberimg = new Image()
-    grabberimg.src = 'grabber.png'
+    let pomaoimg = new Image()
+    pomaoimg.src = 'rcpomao.png'
 
     const squaretable = {} // this section of code is an optimization for use of the hypotenuse function on Line and LineOP objects
     for(let t = 0;t<10000000;t++){
@@ -81,7 +75,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     newPress = true;// set the boolean variable to true
                     if (!hold) {// if we want to check the single press
                         for (var j = 0, p = gamepadAPI.buttonsCache.length; j < p; j++) {// loop through the cached states from the previous frame
-                            if (gamepadAPI.buttonsCache[j] == button) { // if the button was already pressed, ignore new Gardenpress
+                            if (gamepadAPI.buttonsCache[j] == button) { // if the button was already pressed, ignore new press
                                 newPress = false;
                             }
                         }
@@ -106,28 +100,28 @@ window.addEventListener('DOMContentLoaded', (event) => {
     let YS_engine
     TIP_engine.x = 350
     TIP_engine.y = 350
-    class GardenPoint {
+    class Point {
         constructor(x, y) {
             this.x = x
             this.y = y
             this.radius = 0
         }
         pointDistance(point) {
-            return (new GardenLineOP(this, point, "transparent", 0)).hypotenuse()
+            return (new LineOP(this, point, "transparent", 0)).hypotenuse()
         }
     }
 
-    class GardenVector{ // vector math and physics if you prefer this over vector components on circles
-        constructor(object = (new GardenPoint(0,0)), xmom = 0, ymom = 0){
+    class Vector{ // vector math and physics if you prefer this over vector components on circles
+        constructor(object = (new Point(0,0)), xmom = 0, ymom = 0){
             this.xmom = xmom
             this.ymom = ymom
             this.object = object
         }
         isToward(point){
-            let link = new GardenLineOP(this.object, point)
+            let link = new LineOP(this.object, point)
             let dis1 = link.sqrDis()
-            let dummy = new GardenPoint(this.object.x+this.xmom, this.object.y+this.ymom)
-            let link2 = new GardenLineOP(dummy, point)
+            let dummy = new Point(this.object.x+this.xmom, this.object.y+this.ymom)
+            let link2 = new LineOP(dummy, point)
             let dis2 = link2.sqrDis()
             if(dis2 < dis1){
                 return true
@@ -136,7 +130,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
         }
         rotate(angleGoal){
-            let link = new GardenLine(this.xmom, this.ymom, 0,0)
+            let link = new Line(this.xmom, this.ymom, 0,0)
             let length = link.hypotenuse()
             let x = (length * Math.cos(angleGoal))
             let y = (length * Math.sin(angleGoal))
@@ -144,7 +138,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.ymom = y
         }
         magnitude(){
-            return (new GardenLine(this.xmom, this.ymom, 0,0)).hypotenuse()
+            return (new Line(this.xmom, this.ymom, 0,0)).hypotenuse()
         }
         normalize(size = 1){
             let magnitude = this.magnitude()
@@ -154,26 +148,26 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.ymom*=size
         }
         multiply(vect){
-            let point = new GardenPoint(0,0)
-            let end = new GardenPoint(this.xmom+vect.xmom, this.ymom+vect.ymom)
+            let point = new Point(0,0)
+            let end = new Point(this.xmom+vect.xmom, this.ymom+vect.ymom)
             return point.pointDistance(end)
         }
         add(vect){
-            return new GardenVector(this.object, this.xmom+vect.xmom, this.ymom+vect.ymom)
+            return new Vector(this.object, this.xmom+vect.xmom, this.ymom+vect.ymom)
         }
         subtract(vect){
-            return new GardenVector(this.object, this.xmom-vect.xmom, this.ymom-vect.ymom)
+            return new Vector(this.object, this.xmom-vect.xmom, this.ymom-vect.ymom)
         }
         divide(vect){
-            return new GardenVector(this.object, this.xmom/vect.xmom, this.ymom/vect.ymom) //be careful with this, I don't think this is right
+            return new Vector(this.object, this.xmom/vect.xmom, this.ymom/vect.ymom) //be careful with this, I don't think this is right
         }
         draw(){
-            let dummy = new GardenPoint(this.object.x+this.xmom, this.object.y+this.ymom)
-            let link = new GardenLineOP(this.object, dummy, "#FFFFFF", 1)
+            let dummy = new Point(this.object.x+this.xmom, this.object.y+this.ymom)
+            let link = new LineOP(this.object, dummy, "#FFFFFF", 1)
             link.draw()
         }
     }
-    class GardenLine {
+    class Line {
         constructor(x, y, x2, y2, color, width) {
             this.x1 = x
             this.y1 = y
@@ -216,7 +210,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             canvas_context.lineWidth = linewidthstorage
         }
     }
-    class GardenLineOP {
+    class LineOP {
         constructor(object, target, color, width) {
             this.object = object
             this.target = target
@@ -257,7 +251,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             canvas_context.lineWidth = linewidthstorage
         }
     }
-    class GardenTriangle {
+    class Triangle {
         constructor(x, y, color, length, fill = 0, strokeWidth = 0, leg1Ratio = 1, leg2Ratio = 1, heightRatio = 1) {
             this.x = x
             this.y = y
@@ -311,7 +305,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             return false
         }
     }
-    class GardenRectangle {
+    class Rectangle {
         constructor(x, y, width, height, color, fill = 1, stroke = 0, strokeWidth = 1) {
             this.x = x
             this.y = y
@@ -357,7 +351,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             return false
         }
     }
-    class GardenCircle {
+    class Circle {
         constructor(x, y, radius, color, xmom = 0, ymom = 0, friction = 1, reflect = 0, strokeWidth = 0, strokeColor = "transparent") {
             this.x = x
             this.y = y
@@ -508,7 +502,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             return false
         }
     } 
-    class GardenCircleRing {
+    class CircleRing {
         constructor(x, y, radius, color, xmom = 0, ymom = 0, friction = 1, reflect = 0, strokeWidth = 0, strokeColor = "transparent") {
             this.x = x
             this.y = y
@@ -658,7 +652,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
             return false
         }
-    } class GardenPolygon {
+    } class Polygon {
         constructor(x, y, size, color, sides = 3, xmom = 0, ymom = 0, angle = 0, reflect = 0) {
             if (sides < 2) {
                 sides = 2
@@ -666,7 +660,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.reflect = reflect
             this.xmom = xmom
             this.ymom = ymom
-            this.body = new GardenCircle(x, y, size - (size * .293), "transparent")
+            this.body = new Circle(x, y, size - (size * .293), "transparent")
             this.nodes = []
             this.angle = angle
             this.size = size
@@ -674,7 +668,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.angleIncrement = (Math.PI * 2) / sides
             this.sides = sides
             for (let t = 0; t < sides; t++) {
-                let node = new GardenCircle(this.body.x + (this.size * (Math.cos(this.angle))), this.body.y + (this.size * (Math.sin(this.angle))), 0, "transparent")
+                let node = new Circle(this.body.x + (this.size * (Math.cos(this.angle))), this.body.y + (this.size * (Math.sin(this.angle))), 0, "transparent")
                 this.nodes.push(node)
                 this.angle += this.angleIncrement
             }
@@ -722,7 +716,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.angleIncrement = (Math.PI * 2) / this.sides
             this.body.radius = this.size - (this.size * .293)
             for (let t = 0; t < this.sides; t++) {
-                let node = new GardenCircle(this.body.x + (this.size * (Math.cos(this.angle))), this.body.y + (this.size * (Math.sin(this.angle))), 0, "transparent")
+                let node = new Circle(this.body.x + (this.size * (Math.cos(this.angle))), this.body.y + (this.size * (Math.sin(this.angle))), 0, "transparent")
                 this.nodes.push(node)
                 this.angle += this.angleIncrement
             }
@@ -740,7 +734,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             canvas_context.closePath()
         }
     }
-    class GardenShape {
+    class Shape {
         constructor(shapes) {
             this.shapes = shapes
         }
@@ -809,24 +803,24 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
-    class GardenSpring {
+    class Spring {
         constructor(x, y, radius, color, body = 0, length = 1, gravity = 0, width = 1) {
             if (body == 0) {
-                this.body = new GardenCircle(x, y, radius, color)
-                this.anchor = new GardenCircle(x, y, radius, color)
-                this.beam = new GardenLine(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", width)
+                this.body = new Circle(x, y, radius, color)
+                this.anchor = new Circle(x, y, radius, color)
+                this.beam = new Line(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", width)
                 this.length = length
             } else {
                 this.body = body
-                this.anchor = new GardenCircle(x, y, radius, color)
-                this.beam = new GardenLine(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", width)
+                this.anchor = new Circle(x, y, radius, color)
+                this.beam = new Line(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", width)
                 this.length = length
             }
             this.gravity = gravity
             this.width = width
         }
         balance() {
-            this.beam = new GardenLine(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", this.width)
+            this.beam = new Line(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", this.width)
             if (this.beam.hypotenuse() < this.length) {
                 this.body.xmom += (this.body.x - this.anchor.x) / this.length
                 this.body.ymom += (this.body.y - this.anchor.y) / this.length
@@ -846,7 +840,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.anchor.ymom = (this.anchor.ymom + ymomentumaverage) / 2
         }
         draw() {
-            this.beam = new GardenLine(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", this.width)
+            this.beam = new Line(this.body.x, this.body.y, this.anchor.x, this.anchor.y, "yellow", this.width)
             this.beam.draw()
             this.body.draw()
             this.anchor.draw()
@@ -857,11 +851,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
 
     }  
-    class GardenSpringOP {
+    class SpringOP {
         constructor(body, anchor, length, width = 3, color = body.color) {
             this.body = body
             this.anchor = anchor
-            this.beam = new GardenLineOP(body, anchor, color, width)
+            this.beam = new LineOP(body, anchor, color, width)
             this.length = length
         }
         balance() {
@@ -892,7 +886,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
-    class GardenColor {
+    class Color {
         constructor(baseColor, red = -1, green = -1, blue = -1, alpha = 1) {
             this.hue = baseColor
             if (red != -1 && green != -1 && blue != -1) {
@@ -959,7 +953,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             for (var i = 0; i < 6; i++) {
                 hash += letters[(Math.floor(Math.random() * 12) + 4)];
             }
-            var color = new GardenColor(hash, 55 + Math.random() * 200, 55 + Math.random() * 200, 55 + Math.random() * 200)
+            var color = new Color(hash, 55 + Math.random() * 200, 55 + Math.random() * 200, 55 + Math.random() * 200)
             return color;
         }
         randomDark() {
@@ -968,7 +962,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             for (var i = 0; i < 6; i++) {
                 hash += letters[(Math.floor(Math.random() * 12))];
             }
-            var color = new GardenColor(hash, Math.random() * 200, Math.random() * 200, Math.random() * 200)
+            var color = new Color(hash, Math.random() * 200, Math.random() * 200, Math.random() * 200)
             return color;
         }
         random() {
@@ -977,24 +971,24 @@ window.addEventListener('DOMContentLoaded', (event) => {
             for (var i = 0; i < 6; i++) {
                 hash += letters[(Math.floor(Math.random() * 16))];
             }
-            var color = new GardenColor(hash, Math.random() * 255, Math.random() * 255, Math.random() * 255)
+            var color = new Color(hash, Math.random() * 255, Math.random() * 255, Math.random() * 255)
             return color;
         }
     }
-    class GardenSoftbody { //buggy, spins in place
+    class Softbody { //buggy, spins in place
         constructor(x, y, radius, color, size, members = 10, memberLength = 5, force = 10, gravity = 0) {
             this.springs = []
-            this.pin = new GardenCircle(x, y, radius, color)
+            this.pin = new Circle(x, y, radius, color)
             this.points = []
             this.flop = 0
             let angle = 0
             this.size = size 
-            let line = new GardenLine((Math.cos(angle)*size), (Math.sin(angle)*size), (Math.cos(angle+ ((Math.PI*2)/members))*size), (Math.sin(angle+ ((Math.PI*2)/members))*size) )
+            let line = new Line((Math.cos(angle)*size), (Math.sin(angle)*size), (Math.cos(angle+ ((Math.PI*2)/members))*size), (Math.sin(angle+ ((Math.PI*2)/members))*size) )
             let distance = line.hypotenuse()
             for(let t =0;t<members;t++){
-                let circ = new GardenCircle(x+(Math.cos(angle)*size), y+(Math.sin(angle)*size), radius, color)
+                let circ = new Circle(x+(Math.cos(angle)*size), y+(Math.sin(angle)*size), radius, color)
                 circ.reflect = 1
-                circ.bigbody = new GardenCircle(x+(Math.cos(angle)*size), y+(Math.sin(angle)*size), distance, color)
+                circ.bigbody = new Circle(x+(Math.cos(angle)*size), y+(Math.sin(angle)*size), distance, color)
                 circ.draw()
                 circ.touch = []
                 this.points.push(circ)
@@ -1006,7 +1000,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     if(t!=k){
                         if(this.points[k].bigbody.doesPerimeterTouch(this.points[t])){
                         if(!this.points[k].touch.includes(t) && !this.points[t].touch.includes(k)){
-                                let spring = new GardenSpringOP(this.points[k], this.points[t], (size*Math.PI)/members, 2, color)
+                                let spring = new SpringOP(this.points[k], this.points[t], (size*Math.PI)/members, 2, color)
                                 this.points[k].touch.push(t)
                                 this.points[t].touch.push(k)
                                 this.springs.push(spring)
@@ -1019,10 +1013,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
             console.log(this)
 
-            // this.spring = new GardenSpring(x, y, radius, color, this.pin, memberLength, gravity)
+            // this.spring = new Spring(x, y, radius, color, this.pin, memberLength, gravity)
             // this.springs.push(this.spring)
             // for (let k = 0; k < members; k++) {
-            //     this.spring = new GardenSpring(x, y, radius, color, this.spring.anchor, memberLength, gravity)
+            //     this.spring = new Spring(x, y, radius, color, this.spring.anchor, memberLength, gravity)
             //     if (k < members - 1) {
             //         this.springs.push(this.spring)
             //     } else {
@@ -1031,7 +1025,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             //     }
             // }
             this.forceConstant = force
-            this.centroid = new GardenCircle(0, 0, 10, "red")
+            this.centroid = new Circle(0, 0, 10, "red")
         }
         circularize() {
             this.xpoint = 0
@@ -1062,7 +1056,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             // this.centroid.x += TIP_engine.x / this.points.length
             // this.centroid.y += TIP_engine.y / this.points.length
             for (let s = 0; s < this.points.length; s++) {
-                this.link = new GardenLineOP(this.points[s], this.centroid, 0, "transparent")
+                this.link = new LineOP(this.points[s], this.centroid, 0, "transparent")
                 if (this.link.hypotenuse() != 0) {
 
                     if(this.size < this.link.hypotenuse()){
@@ -1096,9 +1090,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.centroid.draw()
         }
     }
-    class GardenObserver {
+    class Observer {
         constructor(x, y, radius, color, range = 100, rays = 10, angle = (Math.PI * .125)) {
-            this.body = new GardenCircle(x, y, radius, color)
+            this.body = new Circle(x, y, radius, color)
             this.color = color
             this.ray = []
             this.rayrange = range
@@ -1112,7 +1106,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.currentangle = this.gapangle / 2
             for (let k = 0; k < this.raymake; k++) {
                 this.currentangle += (this.gapangle / Math.ceil(this.raymake / 2))
-                let ray = new GardenCircle(this.body.x, this.body.y, 1, "white", (((Math.cos(this.globalangle + this.currentangle)))), (((Math.sin(this.globalangle + this.currentangle)))))
+                let ray = new Circle(this.body.x, this.body.y, 1, "white", (((Math.cos(this.globalangle + this.currentangle)))), (((Math.sin(this.globalangle + this.currentangle)))))
                 ray.collided = 0
                 ray.lifespan = this.rayrange - 1
                 this.ray.push(ray)
@@ -1147,13 +1141,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.ray = []
         }
     }
-    function setUp(canvas_pass, style = "#AAFFAA") {
+    function setUp(canvas_pass, style = "#0077AA") {
         canvas = canvas_pass
         canvas_context = canvas.getContext('2d');
         canvas.style.background = style
         window.setInterval(function () {
             main()
-        }, 11)
+        }, 1)
         document.addEventListener('keydown', (event) => {
             keysPressed[event.key] = true;
         });
@@ -1167,14 +1161,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
             TIP_engine.x = XS_engine
             TIP_engine.y = YS_engine
             TIP_engine.body = TIP_engine
-            interact()
-            // console.log(pomaos[index])
             // example usage: if(object.isPointInside(TIP_engine)){ take action }
-        window.addEventListener('pointermove', continued_stimuli);
         });
+        window.addEventListener('pointermove', continued_stimuli);
 
         window.addEventListener('pointerup', e => {
-            window.removeEventListener("pointermove", continued_stimuli);
+            // window.removeEventListener("pointermove", continued_stimuli);
         })
         function continued_stimuli(e) {
             FLEX_engine = canvas.getBoundingClientRect();
@@ -1183,10 +1175,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
             TIP_engine.x = XS_engine
             TIP_engine.y = YS_engine
             TIP_engine.body = TIP_engine
-
-            if(keysPressed['f']){
-                fruits.push(new GardenFruit(TIP_engine.x, TIP_engine.y))
-            }
         }
     }
     function gamepad_control(object, speed = 1) { // basic control for objects using the controler
@@ -1264,12 +1252,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
             let limit = granularity
             let shape_array = []
             for (let t = 0; t < limit; t++) {
-                let circ = new GardenCircle((from.x * (t / limit)) + (to.x * ((limit - t) / limit)), (from.y * (t / limit)) + (to.y * ((limit - t) / limit)), radius, "red")
+                let circ = new Circle((from.x * (t / limit)) + (to.x * ((limit - t) / limit)), (from.y * (t / limit)) + (to.y * ((limit - t) / limit)), radius, "red")
                 circ.toRatio = t/limit
                 circ.fromRatio = (limit-t)/limit
                 shape_array.push(circ)
             }
-            return (new GardenShape(shape_array))
+            return (new Shape(shape_array))
     }
 
     let setup_canvas = document.getElementById('canvas') //getting canvas from document
@@ -1277,569 +1265,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
     setUp(setup_canvas) // setting up canvas refrences, starting timer. 
 
     // object instantiation and creation happens here 
+    
 
-
-
-    let fruitsprites = new Image()
-    fruitsprites.src = 'fruitsprites11.png'
-
-    let global = {}
-    global.timeloop = 0
-
-
-    let type = 0
-    let type2 = 0
-
-    class GardenFruit{
-        constructor(x,y){
-            this.body = new GardenCircle(x,y, 15, "transparent", 0, 0, .97, 1)
-            this.type = type
-            this.type2 = type2
-            type++
-            if(type == 10){
-                if(type2 == 9){
-                    type = 0
-                    type2 = 0
-                }
-                type2++
-                type = 0 
-            }
-        }
-        draw(){
-            if(this.body.y > 800){
-                this.body.y = 0
-                this.body.xmom = (Math.random()-.5)*5
-                this.body.ymom = 0
-                this.body.x = Math.random()*800
-            }
-            // this.body.ymom+=.3
-            if(this.anchored != 1){
-                this.body.frictiveMove()
-            }else{
-                this.body.x = this.anchor.x
-                this.body.y = this.anchor.y
-            }
-            let sheetwidth = fruitsprites.width
-            let sheetheight = fruitsprites.height
-            let cols = 10
-            let rows = 10
-            let width = sheetwidth/cols
-            let height = sheetheight/rows
-            let  srcx = Math.floor(this.type)*width
-            let   srcy = Math.floor(this.type2)*height
-            canvas_context.drawImage(fruitsprites, srcx, srcy, width, height, this.body.x-this.body.radius, this.body.y-this.body.radius, this.body.radius*2, this.body.radius*2)
-
-            for(let t = 0;t<pomaos.length;t++){
-                if(pomaos[t].tongue.doesPerimeterTouch(this.body)){
-                    this.anchored = 1
-                    this.anchor = pomaos[t].tongue
-                }
-                if(pomaos[t].centrix.doesPerimeterTouch(this.body)){
-                    if(this.body.radius != .1){
-                        let k = Math.floor(Math.random()*6)
-                        pomaos[t].exps[k] += Math.floor(Math.random()*50)
-                        if(pomaos[t].exps[k]  >= 100){
-                            pomaos[t].exps[k] -=100
-                            pomaos[t].stats[k] +=1
-                        }
-                    }
-                    this.body.radius = .1
-                }
-            }
-        }
-    }
-
-    let UI = {}
-    function empty(){}
-    UI.draw = empty
-    let selected = {}
-
-    class GardenMenu{
-        constructor(){
-            this.poney = 0
-            this.toggle = new GardenRectangle(1240, 700, 40,20, "gray")
-            this.display = 0
-            this.body = new GardenRectangle(360, 100, 640,520, "#88888888")
-            this.racebutton = new GardenRectangle(this.body.x+20, this.body.y + 4, 600,48, "#FFFF0088")
-            this.fightbutton = new GardenRectangle(this.body.x+20, this.body.y + 56, 600,48, "#FF000088")
-            this.dancebutton = new GardenRectangle(this.body.x+20, this.body.y + 108, 600,48, "#00FFFF88")
-            this.schoolbutton = new GardenRectangle(this.body.x+20, this.body.y + 160, 600,48, "#FFFFFF88")
-            this.doctorbutton = new GardenRectangle(this.body.x+20, this.body.y + 212, 600,48, "#FF00FF88")
-            this.marketbutton = new GardenRectangle(this.body.x+20, this.body.y + 264, 600,48, "#0000FF88")
-            this.closebutton = new GardenRectangle(this.body.x+20, this.body.y + 468, 600,48, "#88888888")
-            this.timer = 10
-        }
-        draw(){
-            this.poney+=(pomaos.length/1000)
-            canvas_context.fillStyle = "black"
-            canvas_context.font = "10px arial"
-            canvas_context.fillText("Poney: " + Math.floor(this.poney), 1180, 20)
-
-            this.timer--
-            this.toggle.draw()
-            canvas_context.fillStyle = "black"
-            canvas_context.font = "10px arial"
-            canvas_context.fillText("Menu", this.toggle.x+4, this.toggle.y+13)
-            if(this.display == 1){
-                this.body.draw()
-                this.racebutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("Race", this.racebutton.x+270, this.racebutton.y+33)
-                this.fightbutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("Fight", this.fightbutton.x+268, this.fightbutton.y+33)
-                this.dancebutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("Dance", this.dancebutton.x+265, this.dancebutton.y+33)
-                this.schoolbutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("School", this.schoolbutton.x+260, this.schoolbutton.y+33)
-                this.doctorbutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("Doctor", this.doctorbutton.x+260, this.doctorbutton.y+33)
-                this.marketbutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("Market", this.marketbutton.x+260, this.marketbutton.y+33)
-                this.closebutton.draw()
-                canvas_context.fillStyle = "black"
-                canvas_context.font = "30px arial"
-                canvas_context.fillText("Close", this.closebutton.x+260, this.closebutton.y+33)
-            }
-        }
-            goToRace(){
-
-            }
-            goToFight(){
-
-            }
-            goToDance(){
-
-            }
-            goToSchool(){
-
-            }
-            goToDoctor(){
-
-            }
-            goToMarket(){
-
-            }
-    }
-    let gardenmenu = new GardenMenu()
-
-
-    class GardenStatUI{
-        constructor(pomao){
-
-            this.pomao = pomao
-            this.stats = pomao.stats
-            this.exps = pomao.exps
-        }
-        draw(){
-
-
-
-            this.body = new GardenRectangle(this.pomao.body.x+32, this.pomao.body.y-52, 82, 172, "#00AAAA66")
-            this.body.draw()
-
-            canvas_context.font = "18px Arial";
-            canvas_context.fillStyle = 'yellow'
-            canvas_context.strokeStyle = 'black'
-            canvas_context.lineWidth = 2
-
-            canvas_context.strokeText(this.pomao.name, this.body.x +5, this.body.y+16)
-            canvas_context.fillText(this.pomao.name, this.body.x +5, this.body.y+16)
-
-            canvas_context.font = "12px Arial";
-            for(let t = 0;t<this.stats.length;t++){
-                
-                if(t == 0){
-                    canvas_context.strokeText("Stamina: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                    canvas_context.fillText("Stamina: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                }else if(t == 1){
-                    canvas_context.strokeText("Power: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                    canvas_context.fillText("Power: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                }else if(t == 2){
-                    canvas_context.strokeText("Resilience: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                    canvas_context.fillText("Resilience: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                }else if(t == 3){
-                    canvas_context.strokeText("Speed: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                    canvas_context.fillText("Speed: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                }else if(t == 4){
-                    canvas_context.strokeText("Recovery: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                    canvas_context.fillText("Recovery: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                }else if(t == 5){
-                    canvas_context.strokeText("Finesse: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                    canvas_context.fillText("Finesse: " + this.stats[t], this.body.x +5, this.body.y+35+ (t*24))
-                }
-            }
-            for(let t = 0;t<this.exps.length;t++){
-                let rect = new GardenRectangle(this.body.x + 5, this.body.y+(t*24)+39, 72, 5, "blue")
-                let rect2 = new GardenRectangle(this.body.x + 5, this.body.y+(t*24)+39, (this.exps[t]/100)*72, 5, "yellow")
-                rect.draw()
-                rect2.draw()
-            }
-        }
-    }
-
-
-
-    let typez = 1
-    class GardenPomaoranian{
-        constructor(x, y) {
-            this.name = "Pobert"
-            if(typez == 2){
-                this.name = "Maomar"
-            }
-            if(typez == 3){
-                this.name = "Popomo"
-            }
-            this.width = 35 + (Math.random() * 5)
-            this.height = this.width
-            this.body = new GardenCircle(x,y, 16, "transparent", 0, 0, 1, 1)
-            this.body.x = x
-            this.body.y = y //- (this.height - 1)
-            this.body.radius = 32 //- (this.height - 1)
-            this.dir = 0
-            this.rate = Math.random() + 1
-            this.type = Math.floor(Math.random()*300)
-            this.tonguecolor = getRandomColor()
-            this.centrix = new GardenCircle(this.body.x, this.body.y+5, 3, this.tonguecolor)
-            this.tongue = new GardenCircle(this.body.x, this.body.y+5, 5, this.tonguecolor, 0,0,.5)
-            this.link = new GardenLineOP(this.centrix, this.tongue, this.tonguecolor, 3)
-            this.xdir = 0
-            this.ydir = 0
-            this.type = typez//Math.floor(Math.random()*16) //typez//
-            typez++
-            this.type += (1/64)
-            this.rarity = Math.floor(Math.random()*4)
-            this.stats = [1,1,1,1,1,1]
-            this.exps = [0,0,0,0,0,0]
-            this.count = 0
-            this.rate = 4
-            this.mrate = 2
-        }
-        draw(){
-            this.count++
-            this.centrix.x = this.body.x
-            this.centrix.y = this.body.y+5
-            if(this.count%this.rate == 0){
-                this.tongue.xmom += (this.centrix.x-this.tongue.x)/10
-                this.tongue.frictiveMove()
-            }
-            // this.move()
-            this.tongue.draw()
-            this.link.draw()
-            if(this.count%this.mrate == 0){
-            this.move()
-            }
-            if(this.xdir == 1){
-                if(this.ydir == 1){
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }else if(this.ydir == -1){
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+7*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }else{
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }
-            }else if(this.xdir == -1){
-                if(this.ydir == 1){
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+3*64,0+(this.type*64), 64,64, this.body.x-32, this.body.y-32, 64,64)
-                }else if(this.ydir == -1){
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+5*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }else{
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+4*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }
-            }else{
-                if(this.ydir == 1){
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+128,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }else if(this.ydir == -1){
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+6*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }else{
-                    canvas_context.drawImage(spinsheet, (this.rarity*512)+0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
-                }
-            }
-        }
-
-        repel(){
-            for(let t = 0;t<pomaos.length;t++){
-                if(this != pomaos[t]){
-                    if(this.body.doesPerimeterTouch(pomaos[t].body)){
-                        let link = new GardenLineOP(this.body, pomaos[t].body)
-                        this.centrix.x += ((link.hypotenuse())/2)*(Math.cos(link.angle()))/20
-                        this.centrix.y += ((link.hypotenuse())/2)*(Math.sin(link.angle()))/20
-                        this.tongue.x += ((link.hypotenuse())/2)*(Math.cos(link.angle()))/20
-                        this.tongue.y += ((link.hypotenuse())/2)*(Math.sin(link.angle()))/20
-                        this.body.x += ((link.hypotenuse())/2)*(Math.cos(link.angle()))/20
-                        this.body.y += ((link.hypotenuse())/2)*(Math.sin(link.angle()))/20
-                    }
-                }
-            }
-        }
-        
-        move(){
-            this.repel()
-            // // *
-            // if(keysPressed['s']){
-            //     if(!keysPressed['d'] && !keysPressed['a']){
-            //         this.xdir = 0
-            //     }
-            //     this.ydir = 1
-            // }
-            // if(keysPressed['w']){
-            //     if(!keysPressed['d'] && !keysPressed['a']){
-            //         this.xdir = 0
-            //     }
-            //     this.ydir = -1
-            // }
-            // if(keysPressed['a']){
-            //     if(!keysPressed['s'] && !keysPressed['w']){
-            //         this.ydir = 0
-            //     }
-            //     this.xdir = -1
-            // }
-            // if(keysPressed['d']){
-            //     if(!keysPressed['s'] && !keysPressed['w']){
-            //         this.ydir = 0
-            //     }
-            //     this.xdir = 1
-            // }
-            // if(keysPressed['s'] ||keysPressed['w'] ||keysPressed['d'] ||keysPressed['a']){
-            //     this.body.x += this.xdir/3
-            //     this.body.y += this.ydir/3
-            // }
-            
-
-            //if(Math.random()<.005){
-
-                if(Math.random()<.005){
-                    if(Math.random()<.1){
-                    this.xdir = 0
-                }
-                this.ydir = 1
-            }
-            if(Math.random()<.005){
-                if(Math.random()<.1){
-                    this.xdir = 0
-                }
-                this.ydir = -1
-            }
-            if(Math.random()<.005){
-                if(Math.random()<.1){
-                    this.ydir = 0
-                }
-                this.xdir = -1
-            }
-            if(Math.random()<.005){
-                if(Math.random()<.1){
-                    this.ydir = 0
-                }
-                this.xdir = 1
-            }
-            if(Math.random()<.9){
-                this.moving = 1
-            }else{
-                this.moving = 0
-            }
-
-
-
-            if(this.moving == 1){
-                this.body.x += this.xdir/3
-                this.body.y += this.ydir/3
-                this.tongue.x += this.xdir/3
-                this.tongue.y += this.ydir/3
-                if(this.body.x < 0+32){
-                    this.xdir = 1
-                }
-                if(this.body.x >1280-32){
-                    this.xdir = -1
-                }
-                if(this.body.y < 0+32){
-                    this.ydir = 1
-                }
-                if(this.body.y > 720-32){
-                    this.ydir = -1
-                }
-            }
-
-            if(Math.random()<.001){
-                let point = new GardenPoint(this.body.x+(Math.random()-.5), this.body.y)
-                this.lick(point)
-            }
-        }
-        lick(point){
-         if(point.x < this.body.x){
-            this.tongue.xmom = -39
-            this.xdir = -1
-            this.ydir = 0
-         }else{
-            this.tongue.xmom = 39
-            this.xdir = 1
-            this.ydir = 0
-         }
-        }
-        // draw() {
-        //     this.tongue.frictiveMove()
-        //     this.move()
-        //     this.tongue.draw()
-        //     this.link.draw()
-        //     canvas_context.drawImage(cityfolk, this.dir * 128, (this.type * 128) + 1, 128, 128, this.x, this.y - (Math.sin(((global.timeloop * this.rate) + 3.14)) * 1.7), this.width, this.height + (Math.sin(((global.timeloop * this.rate) + 3.14)) * 1.7))
-        // }
-    }
-
-    let pomaos = []
-
-    for(let t = 0;t<3;t++){
-        pomaos[t] = new GardenPomaoranian(50+Math.random()*1180, 50+Math.random()*620)
-    }
-
-    let fruits = []
-
-    // for(let t = 0;t<16;t++){
-    //     fruits[t] = new GardenFruit(50+Math.random()*1180, 50+Math.random()*620)
-    // }
-    class GardenPointer{
-        constructor(){
-            this.grip = 0
-            this.body = new GardenCircle(16,16, 16, "transparent")
-        }
-        draw(){
-            if(gamepadAPI.buttonsCache.includes("A") ||   gamepadAPI.buttonsCache.includes("B")){
-                let point = new GardenPoint(this.body.x-16, this.body.y-16)
-                interact(point)
-            }
-
-            if(gamepadAPI.buttonsCache.includes("Y")) {
-                if(this.grip == 0){
-                    let point = new GardenPoint(this.body.x-16, this.body.y-16)
-                    interact(point)
-                }
-                this.grip = 1
-            }else{
-                this.grip = 0
-            }
-            if(gamepadAPI.buttonsCache.includes("Right-Trigger")){
-            gamepad_control(this.body,5)
-            }
-            gamepad_control(this.body,5)
-            if(this.grip == 0){
-                canvas_context.drawImage(pointerimg, 0,0, 32, 32, this.body.x-16, this.body.y-16, 32,32)
-            }else{
-                if(typeof UI.pomao != "undefined"){
-                    UI.pomao.body.y = pointer.body.y+30
-                    UI.pomao.body.x = pointer.body.x-9
-                    UI.pomao.centrix.y = pointer.body.y+30
-                    UI.pomao.centrix.x = pointer.body.x-9
-                    UI.pomao.tongue.y = pointer.body.y+30
-                    UI.pomao.tongue.x = pointer.body.x-9
-                }
-                canvas_context.drawImage(grabberimg, 0,0, 32, 32, this.body.x-16, this.body.y-16, 32,32)
-
-            }
-            
-        }
-    }
-
-    let pointer = new GardenPointer()
     function main() {
-        global.timeloop+=.1
         canvas_context.clearRect(0, 0, canvas.width, canvas.height)  // refreshes the image
         gamepadAPI.update() //checks for button presses/stick movement on the connected controller)
-        // // game code goes here]
-        for(let t = 0;t<fruits.length;t++){
-            fruits[t].draw()
-        }
-        for(let t = 0;t<pomaos.length;t++){
-            pomaos[t].draw()
-        }
-        UI.draw()
-        gardenmenu.draw()
-        pointer.draw()
+        // // game code goes here
 
     }
 
-    function interact(point = 0){
-
-        if(point != 0){
-            TIP_engine = point
-            console.log(point)
-        }
-        let wet = 0
-        if(keysPressed['f'] ||   gamepadAPI.buttonsCache.includes("B")){
-        fruits.push(new GardenFruit(TIP_engine.x, TIP_engine.y))
-        let max = 99999999
-        let index = 0
-            for(let t = 0;t<pomaos.length;t++){
-                let link = new GardenLineOP(TIP_engine, pomaos[t].body)
-                if(link.hypotenuse()<max){
-                    max = link.hypotenuse()
-                    index = t
-                }
-            }
-
-        pomaos[index].lick(TIP_engine)
-        }else{
-            for(let t = 0;t<pomaos.length;t++){
-                if(pomaos[t].body.isPointInside(TIP_engine)){
-                    UI = new GardenStatUI(pomaos[t])
-                    wet = 1
-                }
-            }
-            if(gardenmenu.display == 1){
-                if(gardenmenu.racebutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                    gardenmenu.goToRace()
-                }
-                if(gardenmenu.fightbutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                    gardenmenu.goToFight()
-                }
-                if(gardenmenu.dancebutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                    gardenmenu.goToDance()
-                }
-                if(gardenmenu.schoolbutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                    gardenmenu.goToSchool()
-                }
-                if(gardenmenu.doctorbutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                    gardenmenu.goToDoctor()
-                }
-                if(gardenmenu.marketbutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                    gardenmenu.goToMarket()
-                }
-                if(gardenmenu.closebutton.isPointInside(TIP_engine)){
-                    gardenmenu.display = 0
-                }
-
-                if(gardenmenu.timer <=0){
-                    if(gardenmenu.toggle.isPointInside(TIP_engine)){
-                        gardenmenu.display = 0
-                        gardenmenu.timer = 20
-                    }
-                }
-            }else{
-
-                if(gardenmenu.timer <=0){
-                if(gardenmenu.toggle.isPointInside(TIP_engine)){
-                    wet = 1
-                    gardenmenu.display = 1
-                    gardenmenu.timer = 20
-                }
-            }
-            }
-        }
-        if(wet == 0){
-            UI = {}
-            UI.draw = empty
-        }
-    }
 })
