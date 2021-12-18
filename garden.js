@@ -1,6 +1,7 @@
 
 window.addEventListener('DOMContentLoaded', (event) => {
 
+    let aRelease = true
     const cityfolk = new Image()
     cityfolk.src = 'cityfolk6.png'
     const spinsheet = new Image()
@@ -9,6 +10,17 @@ window.addEventListener('DOMContentLoaded', (event) => {
     pointerimg.src = 'pointer.png'
     const grabberimg = new Image()
     grabberimg.src = 'grabber.png'
+
+    const placessheet = new Image()
+    placessheet.src = 'places.png'
+
+    const tetrahedron = new Image()
+    tetrahedron.src = 'gq-sheet.png'
+    const dodecahedron = new Image()
+    dodecahedron.src = 'dodec3sheet.png'
+
+    const icosohedron = new Image()
+    icosohedron.src = 'icosheet.png'
 
     const squaretable = {} // this section of code is an optimization for use of the hypotenuse function on Line and LineOP objects
     for(let t = 0;t<10000000;t++){
@@ -71,7 +83,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
             gamepadAPI.axesStatus = axes;// assign received values
             gamepadAPI.buttonsStatus = pressed;
-            // console.log(pressed); // return buttons for debugging purposes
+            // //console.log(pressed); // return buttons for debugging purposes
             return pressed;
         },
         buttonPressed: function (button, hold) {
@@ -357,6 +369,56 @@ window.addEventListener('DOMContentLoaded', (event) => {
             return false
         }
     }
+    class GardenRectangleStroke {
+        constructor(x, y, width, height, color, fill = 1, stroke = 0, strokeWidth = 1) {
+            this.x = x
+            this.y = y
+            this.height = height
+            this.width = width
+            this.color = color
+            this.xmom = 0
+            this.ymom = 0
+            this.stroke = stroke
+            this.strokeWidth = strokeWidth
+            this.fill = fill
+        }
+        draw() {
+            canvas_context.fillStyle = this.color
+            canvas_context.fillRect(this.x, this.y, this.width, this.height)
+
+            canvas_context.strokeStyle = "black"
+            canvas_context.lineWidth = 3
+            canvas_context.strokeRect(this.x-2, this.y-2, this.width+1, this.height+1)
+        }
+        move() {
+            this.x += this.xmom
+            this.y += this.ymom
+        }
+        isPointInside(point) {
+            if (point.x >= this.x) {
+                if (point.y >= this.y) {
+                    if (point.x <= this.x + this.width) {
+                        if (point.y <= this.y + this.height) {
+                            return true
+                        }
+                    }
+                }
+            }
+            return false
+        }
+        doesPerimeterTouch(point) {
+            if (point.x + point.radius >= this.x) {
+                if (point.y + point.radius >= this.y) {
+                    if (point.x - point.radius <= this.x + this.width) {
+                        if (point.y - point.radius <= this.y + this.height) {
+                            return true
+                        }
+                    }
+                }
+            }
+            return false
+        }
+    }
     class GardenCircle {
         constructor(x, y, radius, color, xmom = 0, ymom = 0, friction = 1, reflect = 0, strokeWidth = 0, strokeColor = "transparent") {
             this.x = x
@@ -380,7 +442,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 canvas_context.fill()
                 canvas_context.stroke();
             } else {
-                console.log("The circle is below a radius of 0, and has not been drawn. The circle is:", this)
+                //console.log("The circle is below a radius of 0, and has not been drawn. The circle is:", this)
             }
         }
         move() {
@@ -531,7 +593,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 canvas_context.fill()
                 canvas_context.stroke();
             } else {
-                console.log("The circle is below a radius of 0, and has not been drawn. The circle is:", this)
+                //console.log("The circle is below a radius of 0, and has not been drawn. The circle is:", this)
             }
         }
         move() {
@@ -1017,7 +1079,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 }
             }
 
-            console.log(this)
+            //console.log(this)
 
             // this.spring = new GardenSpring(x, y, radius, color, this.pin, memberLength, gravity)
             // this.springs.push(this.spring)
@@ -1151,6 +1213,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         canvas = canvas_pass
         canvas_context = canvas.getContext('2d');
         canvas.style.background = style
+        canvas_context.imageSmoothingEnabled = false;
         window.setInterval(function () {
             main()
         }, 11)
@@ -1168,7 +1231,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             TIP_engine.y = YS_engine
             TIP_engine.body = TIP_engine
             interact()
-            // console.log(pomaos[index])
+            // //console.log(pomaos[index])
             // example usage: if(object.isPointInside(TIP_engine)){ take action }
         window.addEventListener('pointermove', continued_stimuli);
         });
@@ -1190,7 +1253,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
     }
     function gamepad_control(object, speed = 1) { // basic control for objects using the controler
-//         console.log(gamepadAPI.axesStatus[1]*gamepadAPI.axesStatus[0]) //debugging
+//         //console.log(gamepadAPI.axesStatus[1]*gamepadAPI.axesStatus[0]) //debugging
         if (typeof object.body != 'undefined') {
             if(typeof (gamepadAPI.axesStatus[1]) != 'undefined'){
                 if(typeof (gamepadAPI.axesStatus[0]) != 'undefined'){
@@ -1284,6 +1347,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
     fruitsprites.src = 'fruitsprites11.png'
 
     let global = {}
+    global.racing = 0
+    global.fighting = 0
     global.timeloop = 0
 
 
@@ -1413,10 +1478,35 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
         }
             goToRace(){
-
+                global.racing = 1
+                global.startup = 100
+                global.race = -1
+                global.raceplaced = 0
+                global.challengers = []
+                for(let t = 0;t<5;t++){
+                    global.challengers.push(new GardenPomaoranian(100, 200+(t*100)))
+                    global.challengers[t].stats[3] = (Math.random()*50)
+                }
             }
             goToFight(){
 
+                UI.pomao.tongue.x = 350
+                UI.pomao.tongue.y = 350
+                global.fighting = 1
+                global.startup = 100
+                global.fight = -1
+                global.opponentsbeat = 0
+                global.challengers = []
+                UI.pomao.turn = true
+                for(let t = 0;t<6;t++){
+                    if(t<1 ||t>4){
+                        global.challengers.push(new GardenFighter(1000, 50+(t*110)))
+                    }else if(t == 3 || t== 2){
+                        global.challengers.push(new GardenFighter(800, 50+(t*110)))
+                    }else{
+                        global.challengers.push(new GardenFighter(900, 50+(t*110)))
+                    }
+                }
             }
             goToDance(){
 
@@ -1432,6 +1522,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
     }
     let gardenmenu = new GardenMenu()
+    let raceUI = new GardenMenu()
 
 
     class GardenStatUI{
@@ -1442,10 +1533,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.exps = pomao.exps
         }
         draw(){
+            this.pomao.selected = 1
 
 
-
-            this.body = new GardenRectangle(this.pomao.body.x+32, this.pomao.body.y-52, 82, 172, "#00AAAA66")
+            this.body = new GardenRectangle(this.pomao.body.x+32, this.pomao.body.y-52, 92, 172, "#00AAAA66")
             this.body.draw()
 
             canvas_context.font = "18px Arial";
@@ -1490,9 +1581,15 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 
 
-    let typez = 1
+    let typez = 0
     class GardenPomaoranian{
         constructor(x, y) {
+            this.target = {}
+            this.target.agent = {}
+            this.target.agent.body = {} 
+            this.target.agent.body.y = 1200
+            this.target.agent.body.x = 1200
+            this.turn = true
             this.name = "Pobert"
             if(typez == 2){
                 this.name = "Maomar"
@@ -1524,8 +1621,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.count = 0
             this.rate = 4
             this.mrate = 2
+            this.victor = 0
         }
         draw(){
+            this.health = (this.stats[0]*3)+1
+            this.maxhealth = this.health
+            this.victor = 0
             this.count++
             this.centrix.x = this.body.x
             this.centrix.y = this.body.y+5
@@ -1565,6 +1666,118 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 }
             }
         }
+        fight(){
+
+            if(keysPressed['g']){
+                if(this.turn == true){
+                    this.lick(this.target.agent.body)
+                    this.turn = false
+                    this.target.agent.health -= this.target.agent.maxhealth*.2
+                    this.attacktimeout = 0
+                }
+            }
+            this.attacktimeout++
+            if(this.attacktimeout>30){
+                this.turn = true
+            }
+
+    
+            this.healthbar = new GardenRectangleStroke(this.body.x-32, this.body.y+39, this.body.radius*2*(this.health/this.maxhealth), 10, `rgb( ${255-(this.health*25)*3},${this.health*25*3}, 0)`)
+            this.healthbar.draw()
+            this.victor = 0
+            //console.log(this)
+            this.count++
+            this.centrix.x = this.body.x
+            this.centrix.y = this.body.y+5
+            if(this.count%this.rate == 0){
+                this.tongue.xmom += (this.centrix.x-this.tongue.x)/10
+                this.tongue.frictiveMove()
+            }
+            // this.move()
+            this.tongue.draw()
+            this.link.draw()
+            // if(this.count%this.mrate == 0){
+            // this.move()
+            // }
+            if(this.xdir == 1){
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+7*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }else if(this.xdir == -1){
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+3*64,0+(this.type*64), 64,64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+5*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+4*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }else{
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+128,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+6*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }
+        }
+
+        race(){
+            this.xdir = 0
+            this.ydir = 0
+            this.count++
+            if(this.count%this.mrate == 0){
+                if(global.startup <= 0){
+                    if(this.body.x > 1200){
+
+                     if(this.victor == 0){
+                        this.victor = global.raceplaced+1
+                        global.raceplaced+=1
+                        if(global.raceplaced == global.challengers.length+1){
+                            global.startup = 200
+                        }
+                     }
+                    }else{
+                        this.body.x +=(this.stats[3]/100)+.5
+                    }
+                }
+            }
+            this.tongue.x = this.body.x
+            this.tongue.y = this.body.y
+            if(this.xdir == 1){
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+7*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }else if(this.xdir == -1){
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+3*64,0+(this.type*64), 64,64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+5*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+4*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }else{
+                if(this.ydir == 1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+128,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else if(this.ydir == -1){
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+6*64,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }else{
+                    canvas_context.drawImage(spinsheet, (this.rarity*512)+0,0+(this.type*64), 64, 64, this.body.x-32, this.body.y-32, 64,64)
+                }
+            }
+
+            if(this.victor != 0){
+                canvas_context.drawImage(placessheet, (this.victor*32)-32,0, 31, 31, this.body.x+32, this.body.y-32, 32,32)
+            }
+        }
 
         repel(){
             for(let t = 0;t<pomaos.length;t++){
@@ -1584,38 +1797,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
         
         move(){
             this.repel()
-            // // *
-            // if(keysPressed['s']){
-            //     if(!keysPressed['d'] && !keysPressed['a']){
-            //         this.xdir = 0
-            //     }
-            //     this.ydir = 1
-            // }
-            // if(keysPressed['w']){
-            //     if(!keysPressed['d'] && !keysPressed['a']){
-            //         this.xdir = 0
-            //     }
-            //     this.ydir = -1
-            // }
-            // if(keysPressed['a']){
-            //     if(!keysPressed['s'] && !keysPressed['w']){
-            //         this.ydir = 0
-            //     }
-            //     this.xdir = -1
-            // }
-            // if(keysPressed['d']){
-            //     if(!keysPressed['s'] && !keysPressed['w']){
-            //         this.ydir = 0
-            //     }
-            //     this.xdir = 1
-            // }
-            // if(keysPressed['s'] ||keysPressed['w'] ||keysPressed['d'] ||keysPressed['a']){
-            //     this.body.x += this.xdir/3
-            //     this.body.y += this.ydir/3
-            // }
-            
-
-            //if(Math.random()<.005){
+            if((this.body.x-this.tongue.x) > 10){
+                this.xdir = -1
+                this.ydir = 0
+            }
+            if((this.body.x-this.tongue.x) < -10){
+                this.xdir = 1
+                this.ydir = 0
+            }
 
                 if(Math.random()<.005){
                     if(Math.random()<.1){
@@ -1674,12 +1863,25 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
         }
         lick(point){
+
+            if((this.body.x-this.tongue.x) > 10){
+                return
+            }
+            if((this.body.x-this.tongue.x) < -10){
+            return
+            }
          if(point.x < this.body.x){
             this.tongue.xmom = -39
+            if(global.fighting == 1){
+                this.tongue.xmom -= 39
+            }
             this.xdir = -1
             this.ydir = 0
          }else{
             this.tongue.xmom = 39
+            if(global.fighting == 1){
+                this.tongue.xmom += 39
+            }
             this.xdir = 1
             this.ydir = 0
          }
@@ -1695,7 +1897,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
     let pomaos = []
 
-    for(let t = 0;t<3;t++){
+    for(let t = 0;t<5;t++){
         pomaos[t] = new GardenPomaoranian(50+Math.random()*1180, 50+Math.random()*620)
     }
 
@@ -1712,7 +1914,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
         draw(){
             if(gamepadAPI.buttonsCache.includes("A") ||   gamepadAPI.buttonsCache.includes("B")){
                 let point = new GardenPoint(this.body.x-16, this.body.y-16)
+                aRelease = false
                 interact(point)
+            }else{
+                aRelease = true
             }
 
             if(gamepadAPI.buttonsCache.includes("Y")) {
@@ -1746,12 +1951,114 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
+    class GardenFighter{
+        constructor(x,y){
+
+            this.selected = 0
+            if(Math.random() < .3){
+                
+                this.agent = new GardenTetrahedron(x,y)
+                }else if(Math.random() < .5){
+                
+                    this.agent = new GardenIcosahedron(x,y)
+                    }else{
+
+                this.agent = new GardenDodecahedron(x,y)
+            }
+        }
+        draw(){
+            this.agent.draw()
+            if(this.selected == 1){
+                let circ = new GardenCircle(this.agent.body.x, this.agent.body.y - 37, 4, "black")
+                let circ2 = new GardenCircle(this.agent.body.x, this.agent.body.y - 37, 2, "white")
+                let circ3 = new GardenCircle(this.agent.body.x, this.agent.body.y - 37, 1, "black")
+                circ.draw()
+                circ2.draw()
+                circ3.draw()
+            }
+        }
+        clean(){
+            if(this.agent.health <= 0){
+                global.challengers.splice(global.challengers.indexOf(this), 1)
+            }
+        }
+    }
+    class GardenTetrahedron{
+        constructor(x,y){
+            this.body = new GardenCircle(x,y, 16, "transparent")
+            this.tick = 0
+            this.tock = 5
+            this.frame = 0
+            this.health = 100
+            this.maxhealth = this.health
+            this.damage = 10
+        }
+        draw(){
+            this.tick++
+            if(this.tick%this.tock == 0){
+                this.frame++
+                this.frame%=12
+            }
+            canvas_context.drawImage(tetrahedron, 64*this.frame,0, 64,64, this.body.x-32, this.body.y-32,64,64 )
+            this.healthbar = new GardenRectangleStroke(this.body.x-32, this.body.y+35, this.body.radius*4*(this.health/this.maxhealth), 10, `rgb( ${255-(this.health*2.5)},${this.health*2.5}, 0)`)
+            this.healthbar.draw()
+        }
+    }
+    class GardenIcosahedron{
+        constructor(x,y){
+            this.body = new GardenCircle(x,y, 16, "transparent")
+            this.tick = 0
+            this.tock = 5
+            this.frame = 0
+            this.health = 100
+            this.maxhealth = this.health
+            this.damage = 10
+        }
+        draw(){
+            this.tick++
+            if(this.tick%this.tock == 0){
+                this.frame++
+                this.frame%=22
+            }
+            canvas_context.drawImage(icosohedron, 128*this.frame,0, 128,128, this.body.x-32, this.body.y-32,64,64 )
+            this.healthbar = new GardenRectangleStroke(this.body.x-32, this.body.y+35, this.body.radius*4*(this.health/this.maxhealth), 10, `rgb( ${255-(this.health*2.5)},${this.health*2.5}, 0)`)
+            this.healthbar.draw()
+        }
+    }
+
+    class GardenDodecahedron{
+        constructor(x,y){
+            this.body = new GardenCircle(x,y, 16, "transparent")
+            this.tick = 0
+            this.tock = 1
+            this.frame = 0
+            this.health = 100
+            this.maxhealth = this.health
+            this.damage = 10
+        }
+        draw(){
+            this.tick++
+            if(this.tick%this.tock == 0){
+                this.frame++
+                this.frame%=116
+            }
+            canvas_context.drawImage(dodecahedron, 128*this.frame,0, 128,128, this.body.x-32, this.body.y-32,64,64 )
+            this.healthbar = new GardenRectangleStroke(this.body.x-32, this.body.y+36, this.body.radius*4*(this.health/this.maxhealth), 10, `rgb( ${255-(this.health*2.5)},${this.health*2.5}, 0)`)
+            this.healthbar.draw()
+        }
+    }
+
+
+    
+    let tet = new GardenFighter()
     let pointer = new GardenPointer()
     function main() {
+        if(global.racing == 0 && global.fighting == 0){
         global.timeloop+=.1
         canvas_context.clearRect(0, 0, canvas.width, canvas.height)  // refreshes the image
         gamepadAPI.update() //checks for button presses/stick movement on the connected controller)
         // // game code goes here]
+        tet.draw()
         for(let t = 0;t<fruits.length;t++){
             fruits[t].draw()
         }
@@ -1761,16 +2068,101 @@ window.addEventListener('DOMContentLoaded', (event) => {
         UI.draw()
         gardenmenu.draw()
         pointer.draw()
+    }else if(global.racing == 1){
+        canvas_context.clearRect(0, 0, canvas.width, canvas.height)  // refreshes the image
+        gamepadAPI.update() //checks for button presses/stick movement on the connected controller)
+        raceUI.draw()
+        if(keysPressed['r']){
+            global.race = 0
+        }
+        for(let t = 0;t<global.challengers.length;t++){
+                global.challengers[t].race()
+        }
+        for(let t = 0;t<pomaos.length;t++){
+
+            if(pomaos[t].selected == 1){
+                if(global.race == -1){
+                    pomaos[t].xdir = 1
+                    pomaos[t].ydir = 0
+                    pomaos[t].body.x = 100
+                    pomaos[t].body.y = 100
+                    pomaos[t].centrix.x = 100
+                    pomaos[t].centrix.y = 100
+                    pomaos[t].tongue.x = 100
+                    pomaos[t].tongue.y = 100
+                }
+                pomaos[t].race()
+            }
+        }
+        if(global.race > -1){
+            global.startup--
+        }
+        if(global.raceplaced == global.challengers.length+1){
+            if(global.startup == 0){
+                global.racing = 0
+                for(let t = 0;t<pomaos.length;t++){
+                        pomaos[t].selected = 0
+                    }
+            }
+        }
+    }else if(global.fighting == 1){
+
+
+        pointer.draw()
+        canvas_context.clearRect(0, 0, canvas.width, canvas.height)  // refreshes the image
+        gamepadAPI.update() //checks for button presses/stick movement on the connected controller)
+        raceUI.draw()
+        if(keysPressed['r']){
+            global.fight = 0
+        }
+        for(let t = 0;t<global.challengers.length;t++){
+                global.challengers[t].draw()
+        }
+        for(let t = 0;t<global.challengers.length;t++){
+                global.challengers[t].clean()
+        }
+        let index = 0
+        for(let t = 0;t<pomaos.length;t++){
+
+            if(pomaos[t].selected == 1){
+                pomaos[t].xdir = 1
+                pomaos[t].ydir = 0
+                    pomaos[t].body.x = 350
+                    pomaos[t].body.y = 350
+                    pomaos[t].centrix.x = 350
+                    pomaos[t].centrix.y = 350
+                    // pomaos[t].tongue.x = 350
+                    // pomaos[t].tongue.y = 350
+                    index = t
+                pomaos[t].fight()
+            }
+        }
+        if(global.fight > -1){
+            global.startup--
+        }
+        if(global.opponentsbeat == global.challengers.length){
+            if(global.startup == 0){
+                global.fighting = 0
+                for(let t = 0;t<pomaos.length;t++){
+                        pomaos[t].selected = 0
+                    }
+            }
+        }
+    }
 
     }
 
     function interact(point = 0){
-
+        if(global.racing == 0 && global.fighting == 0){
+            
         if(point != 0){
             TIP_engine = point
-            console.log(point)
         }
         let wet = 0
+
+        if(gardenmenu.toggle.isPointInside(TIP_engine)){
+            wet = 1
+        }
         if(keysPressed['f'] ||   gamepadAPI.buttonsCache.includes("B")){
         fruits.push(new GardenFruit(TIP_engine.x, TIP_engine.y))
         let max = 99999999
@@ -1795,10 +2187,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 if(gardenmenu.racebutton.isPointInside(TIP_engine)){
                     gardenmenu.display = 0
                     gardenmenu.goToRace()
+                    wet = 0
                 }
                 if(gardenmenu.fightbutton.isPointInside(TIP_engine)){
                     gardenmenu.display = 0
                     gardenmenu.goToFight()
+                    wet = 0
                 }
                 if(gardenmenu.dancebutton.isPointInside(TIP_engine)){
                     gardenmenu.display = 0
@@ -1820,7 +2214,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     gardenmenu.display = 0
                 }
 
-                if(gardenmenu.timer <=0){
+                if(gardenmenu.timer <=0 ){
                     if(gardenmenu.toggle.isPointInside(TIP_engine)){
                         gardenmenu.display = 0
                         gardenmenu.timer = 20
@@ -1834,12 +2228,40 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     gardenmenu.display = 1
                     gardenmenu.timer = 20
                 }
+            }else{
+                wet = 1
             }
             }
         }
+        
         if(wet == 0){
+            if(typeof UI.pomao != 'undefined'){
+                if(global.racing == 0 && global.fighting == 0 && aRelease == true ){ //nodraw?
+                    UI.pomao.selected = 0
+                }
+            }
             UI = {}
             UI.draw = empty
         }
+        }else if(global.fighting == 1){
+            for(let t = 0;t<global.challengers.length;t++){
+                if(global.challengers[t].agent.body.isPointInside(TIP_engine)){
+
+                    for(let k = 0;k<global.challengers.length;k++){
+                        global.challengers[k].selected = 0
+                    }
+                    global.challengers[t].selected = 1
+
+                    for(let k = 0;k<pomaos.length;k++){
+                        if(pomaos[k].selected == 1){
+                        console.log( pomaos[k], global.challengers[t])
+                        pomaos[k].target = global.challengers[t]
+                        }
+                    }
+                    break
+                }
+            }
+        }
+
     }
 })
